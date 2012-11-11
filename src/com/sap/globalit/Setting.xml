@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="plugin">org.apache.maven.plugins:maven-deploy-plugin:2.7:deploy-file</entry>
+	<entry key="url">http://nexus.wdf.sap.corp:8081/nexus/content/repositories/deploy.snapshots </entry>
+	<entry key="repositoryId">build.snapshots.ios</entry>
+</properties>
