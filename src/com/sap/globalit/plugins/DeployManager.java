@@ -1,8 +1,7 @@
-package com.sap.globalit;
+package com.sap.globalit.plugins;
 
 import java.io.IOException;
 
-import com.sap.globalit.plugins.DeployTask;
 
 
 public class DeployManager {

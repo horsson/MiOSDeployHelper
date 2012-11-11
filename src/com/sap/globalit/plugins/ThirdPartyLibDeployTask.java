@@ -15,6 +15,7 @@ import org.kamranzafar.jtar.TarEntry;
 import org.kamranzafar.jtar.TarOutputStream;
 
 import com.sap.globalit.ConfigFile;
+import com.sap.globalit.MavenBuildCommand;
 import com.sap.globalit.PomFile;
 
 public class ThirdPartyLibDeployTask implements DeployTask {
@@ -29,9 +30,12 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 	/**
 	 * It stores the files that will be uploaded to the server.
 	 */
-	private List<File> filesList = new ArrayList<File>();
+	private List<File> createdFileList = new ArrayList<File>();
 
-
+/**
+ * A Tar file.
+ */
+	private File tarFile;
 	private String getArtifactIdAndVersion() {
 		return String.format("%s-%s", cfgFile.artifacId, cfgFile.version);
 	}
@@ -41,6 +45,10 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		return result;
 	}
 
+	/**
+	 * Create a Root folder where all files are stored.
+	 * @return true successfully, false fail.
+	 */
 	private boolean createRootFolder() {
 		this.rootFolder = new File(cfgFile.rootFolder);
 		if (!rootFolder.exists()) {
@@ -53,7 +61,7 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 	/**
 	 * Create a new file
 	 * @param file The file to be created
-	 * @param content The content to be wirtten in file.
+	 * @param content The content to be written in file.
 	 * @throws IOException
 	 */
 	private void createFile(File file, String content) throws IOException {
@@ -130,7 +138,9 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		
 		ArrayList<File> releaseOsFileList = this.getFileList(folderPath);
 		String releaseOsFileName = String.format(stringPattern, cfgFile.artifacId,cfgFile.version,version,target);
-		this.createTarFile(new File(rootFolder,releaseOsFileName), releaseOsFileList);
+		File headerTagFile = new File(rootFolder,releaseOsFileName);
+		createdFileList.add(headerTagFile);
+		this.createTarFile(headerTagFile, releaseOsFileList);
 	}
 	
 	/**
@@ -145,6 +155,7 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		String stringPattern = "%s-%s-%s-%s.a";
 		File srcFile = new File(filePath);
 		File destFile = new File(rootFolder,String.format(stringPattern, cfgFile.artifacId,cfgFile.version,version,target));
+		createdFileList.add(destFile);
 		copyFile(srcFile, destFile);
 		
 	}
@@ -162,8 +173,6 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		File file = new File(rootFolder, "pom.xml");
 		pomFile.saveToFile(file);
 	}
-	
-
 
 	/**
 	 * (2)
@@ -186,7 +195,7 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 
 		File tarFile = new File(rootFolder, this.getArtifactIdAndVersion()
 				+ ".tar");
-		
+		this.tarFile = tarFile;
 		this.createTarFile(tarFile, fileList);
 	}
 	
@@ -259,6 +268,8 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		this.createTar();
 		this.createHeaderFiles();
 		this.createLibFiles();
+		MavenBuildCommand mbc  = new MavenBuildCommand(cfgFile, createdFileList, tarFile);
+		System.out.println(mbc.getCommandLine());
 	}
 
 	@Override
@@ -271,7 +282,6 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		for (File aFile : tempFileList) {
 			aFile.delete();
 		}
-		
 	}
 
 }

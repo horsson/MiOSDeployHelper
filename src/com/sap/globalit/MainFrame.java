@@ -19,6 +19,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
+import com.sap.globalit.plugins.DeployManager;
 import com.sap.globalit.plugins.DeployTask;
 import com.sap.globalit.plugins.ThirdPartyLibDeployTask;
 
@@ -219,6 +220,7 @@ public class MainFrame extends JFrame implements MouseListener{
 				ConfigFile cfgFile = getConfigFileFromUI();
 				DeployManager deployManager = new DeployManager();
 				DeployTask deployTask = new ThirdPartyLibDeployTask();
+				deployManager.setDeplyTask(deployTask);
 				deployTask.setConfigFile(cfgFile);
 				try {
 					deployManager.deploy();
