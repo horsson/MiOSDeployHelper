@@ -44,14 +44,16 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 	/**
 	 * Create a Root folder where all files are stored.
 	 * @return true successfully, false fail.
+	 * @throws IOException 
 	 */
-	private boolean createRootFolder() {
+	private boolean createRootFolder() throws IOException {
 		this.rootFolder = new File(cfgFile.rootFolder);
-		if (!rootFolder.exists()) {
-			return rootFolder.mkdir();
-		} else {
-			return true;
+		if (rootFolder.exists())
+		{
+			FileUtils.deleteDirectory(rootFolder);
 		}
+		
+		return rootFolder.mkdir();
 	}
 
 	/**
@@ -197,7 +199,7 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		Utils.zipFolder(bundleFileFolder, bundleFileName);
 		FileUtils.deleteDirectory(bundleFileFolder);
 		bundleFileName.renameTo(bundleFileFolder);
-		createdFileList.add(bundleFileName);
+		createdFileList.add(bundleFileFolder);
 	}
 
 	
@@ -216,12 +218,10 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		this.createLibFiles();
 		this.createBundleResource();
 		MavenBuildCommand mbc  = new MavenBuildCommand(cfgFile, createdFileList, tarFile);
-		System.out.println(mbc.getCommandLine());
 	}
 
 	@Override
 	public void init() throws IOException {
-				
 	}
 
 	@Override
