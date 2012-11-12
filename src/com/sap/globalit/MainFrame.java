@@ -41,6 +41,7 @@ public class MainFrame extends JFrame implements MouseListener{
 	private JTextField txtDS;
 	private JTextField txtResourceFolder;
 	private JTextArea txtReadme;
+	private JTextField txtClassifier;
 
 	/**
 	 * Launch the application.
@@ -95,26 +96,35 @@ public class MainFrame extends JFrame implements MouseListener{
 		
 		txtGroupId = new JTextField();
 		txtGroupId.setColumns(10);
-		txtGroupId.setBounds(103, 51, 149, 28);
+		txtGroupId.setBounds(103, 51, 347, 28);
 		panelGeneral.add(txtGroupId);
 		
 		JLabel lblArtifactId = new JLabel("Artifact ID");
-		lblArtifactId.setBounds(21, 91, 74, 16);
+		lblArtifactId.setBounds(21, 137, 74, 16);
 		panelGeneral.add(lblArtifactId);
 		
 		txtVersion = new JTextField();
 		txtVersion.setColumns(10);
-		txtVersion.setBounds(325, 51, 123, 28);
+		txtVersion.setBounds(103, 91, 347, 28);
 		panelGeneral.add(txtVersion);
 		
 		JLabel lblVersion = new JLabel("Version");
-		lblVersion.setBounds(264, 57, 88, 16);
+		lblVersion.setBounds(21, 97, 88, 16);
 		panelGeneral.add(lblVersion);
 		
 		txtArtifactId = new JTextField();
 		txtArtifactId.setColumns(10);
-		txtArtifactId.setBounds(103, 85, 149, 28);
+		txtArtifactId.setBounds(103, 131, 347, 28);
 		panelGeneral.add(txtArtifactId);
+		
+		JLabel lblClassifier = new JLabel("Classifier");
+		lblClassifier.setBounds(21, 177, 61, 16);
+		panelGeneral.add(lblClassifier);
+		
+		txtClassifier = new JTextField();
+		txtClassifier.setBounds(103, 171, 347, 28);
+		panelGeneral.add(txtClassifier);
+		txtClassifier.setColumns(10);
 		
 		JPanel panelFiles = new JPanel();
 		tabbedPane.addTab("Files", null, panelFiles, null);
@@ -281,7 +291,7 @@ public class MainFrame extends JFrame implements MouseListener{
 		if (event.getClickCount() != 2)
 			return;
 		JTextField textField = (JTextField) event.getSource();
-		if (textField == txtRootFolder || textField == txtHeaderFolder)
+		if (textField == txtRootFolder || textField == txtHeaderFolder || textField == txtResourceFolder)
 			System.setProperty("apple.awt.fileDialogForDirectories", "true");
 		else
 			System.setProperty("apple.awt.fileDialogForDirectories", "false");
@@ -329,6 +339,7 @@ public class MainFrame extends JFrame implements MouseListener{
 		cfgFile.resourceFolder = txtResourceFolder.getText();
 		cfgFile.rootFolder = txtRootFolder.getText();
 		cfgFile.version = txtVersion.getText();
+		cfgFile.classifier = txtClassifier.getText();
 		return cfgFile;
 	}
 	
@@ -344,5 +355,6 @@ public class MainFrame extends JFrame implements MouseListener{
 		txtRS.setText(cfgFile.releaseSimFolder);
 		txtResourceFolder.setText(cfgFile.resourceFolder);
 		txtReadme.setText(cfgFile.readme);
+		txtClassifier.setText(cfgFile.classifier);
 	}
 }

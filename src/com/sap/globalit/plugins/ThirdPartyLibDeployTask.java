@@ -1,20 +1,16 @@
 package com.sap.globalit.plugins;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kamranzafar.jtar.TarEntry;
-import org.kamranzafar.jtar.TarOutputStream;
+import org.apache.commons.io.FileUtils;
 
 import com.sap.globalit.ConfigFile;
+import com.sap.globalit.Utils;
 import com.sap.globalit.MavenBuildCommand;
 import com.sap.globalit.PomFile;
 
@@ -71,60 +67,9 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		fos.close();
 	}
 
-	/**
-	 * Create a Tar file with file list
-	 * @param tarFile
-	 * @param fileList
-	 * @throws IOException
-	 */
-	private void createTarFile(File tarFile, ArrayList<File> fileList) throws IOException
-	{
-		FileOutputStream fos = new FileOutputStream(tarFile);
-		TarOutputStream tos = new TarOutputStream(new BufferedOutputStream(fos));
 
-		for (File aFile : fileList) {
-			tos.putNextEntry(new TarEntry(aFile, aFile.getName()));
-			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(aFile));
-			int count;
-			byte[] data = new byte[2048];
-			while ((count = bis.read(data))!= -1)
-			{
-				tos.write(data,0,count);
-			}
-			tos.flush();
-			bis.close();
-		}
-		tos.close();
-	}
 	
-	/**
-	 * Copy one file from source to destination.
-	 * @param sourceFile
-	 * @param destFile
-	 * @throws IOException
-	 */
-	private static void copyFile(File sourceFile, File destFile)
-			throws IOException {
-		if (!destFile.exists()) {
-			destFile.createNewFile();
-		}
 
-		FileChannel source = null;
-		FileChannel destination = null;
-		try {
-			source = new FileInputStream(sourceFile).getChannel();
-			destination = new FileOutputStream(destFile).getChannel();
-			destination.transferFrom(source, 0, source.size());
-		} finally {
-			if (source != null) {
-				source.close();
-			}
-			if (destination != null) {
-				destination.close();
-			}
-
-		}
-	}
 
 	/**
 	 * Create Header files
@@ -140,7 +85,7 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		String releaseOsFileName = String.format(stringPattern, cfgFile.artifacId,cfgFile.version,version,target);
 		File headerTagFile = new File(rootFolder,releaseOsFileName);
 		createdFileList.add(headerTagFile);
-		this.createTarFile(headerTagFile, releaseOsFileList);
+		Utils.createTarFile(headerTagFile, releaseOsFileList);
 	}
 	
 	/**
@@ -156,7 +101,7 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		File srcFile = new File(filePath);
 		File destFile = new File(rootFolder,String.format(stringPattern, cfgFile.artifacId,cfgFile.version,version,target));
 		createdFileList.add(destFile);
-		copyFile(srcFile, destFile);
+		Utils.copyFile(srcFile, destFile);
 		
 	}
 	/**
@@ -196,7 +141,7 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		File tarFile = new File(rootFolder, this.getArtifactIdAndVersion()
 				+ ".tar");
 		this.tarFile = tarFile;
-		this.createTarFile(tarFile, fileList);
+		Utils.createTarFile(tarFile, fileList);
 	}
 	
 	private ArrayList<File> getFileList(String folder)
@@ -243,17 +188,18 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 	}
 
 
-	private void createBundleResource()
+	private void createBundleResource() throws IOException
 	{
-		//TODO: Create BundleResource.
+		File bundleFileFolder = new File(rootFolder, String.format("%s-%s-%s.bundle", cfgFile.artifacId,cfgFile.version, cfgFile.classifier));
+		File bundleFileName = new File(rootFolder, String.format("%s-%s-%s.bundle.zip", cfgFile.artifacId,cfgFile.version, cfgFile.classifier));
+		File resourceDir = new File(cfgFile.resourceFolder);
+		FileUtils.copyDirectory(resourceDir, bundleFileFolder);
+		Utils.zipFolder(bundleFileFolder, bundleFileName);
+		FileUtils.deleteDirectory(bundleFileFolder);
+		bundleFileName.renameTo(bundleFileFolder);
+		createdFileList.add(bundleFileName);
 	}
 
-	private String generateCmdLine()
-	{
-		StringBuilder sb = new StringBuilder();
-		
-		return sb.toString();
-	}
 	
 	@Override
 	public void setConfigFile(ConfigFile cfgFile)
@@ -268,6 +214,7 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		this.createTar();
 		this.createHeaderFiles();
 		this.createLibFiles();
+		this.createBundleResource();
 		MavenBuildCommand mbc  = new MavenBuildCommand(cfgFile, createdFileList, tarFile);
 		System.out.println(mbc.getCommandLine());
 	}

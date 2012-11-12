@@ -27,6 +27,7 @@ public class ConfigFile {
 	public String releaseOsFolder= "";
 	public String resourceFolder= "";
 	public String readme= "";
+	public String classifier = "";
 
 	public void saveToFile(String filePath) {
 		StringBuilder sb = new StringBuilder();
