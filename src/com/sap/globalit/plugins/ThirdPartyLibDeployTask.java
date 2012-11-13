@@ -1,5 +1,6 @@
 package com.sap.globalit.plugins;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -134,7 +135,7 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 		pomFile.setModelVersion("4.0.0");
 		pomFile.setVersion(cfgFile.version);
 		pomFile.setPackaging("xcode-lib");
-		File file = new File(rootFolder, "pom.xml");
+		File file = new File(rootFolder, PomFile.DEFAULT_POM_FILE_NAME);
 		pomFile.saveToFile(file);
 	}
 
@@ -297,20 +298,25 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 				MavenBuildCommand mbc = new MavenBuildCommand(cfgFile,
 						createdFileList, tarFile);
 				
+				
 				ProcessBuilder pb = new ProcessBuilder(mbc.getCmd());
 				pb.redirectErrorStream(true);
 				pb.directory(rootFolder);
 				
 				Process process = pb.start();
-				BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				String line = null;
+				BufferedInputStream bis = new BufferedInputStream(process.getInputStream());
 				
-				while ((line = br.readLine())!= null)
+				byte[] buffer = new byte[512];
+				int count = -1;
+				
+				while ((count = bis.read(buffer)) != -1)
 				{
-					fireMessageEvent(line);
-					System.out.println(line);
+					String msg = new String(buffer, 0, count);
+					fireMessageEvent(msg);
+					System.out.println(msg);
 				}
-				process.waitFor();
+				int code = process.waitFor();
+				System.out.println("Done ! "+code);
 				
 				
 			} catch (IOException ex) {

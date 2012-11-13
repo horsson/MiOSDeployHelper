@@ -34,7 +34,7 @@ public class MavenBuildCommand {
 		append(" ").
 		append("-Dtypes="+types).
 		append(" ").
-		append("-DDclassifiers="+classifier).
+		append("-Dclassifiers="+classifier).
 		append(" ").
 		append("-DartifactId="+ cfgFile.artifacId).
 		append(" ").
@@ -44,7 +44,7 @@ public class MavenBuildCommand {
 		append(" ").
 		append("-Dpackaging=tar").
 		append(" ").
-		append("-DpomFile=pom.xml");
+		append("-DpomFile="+PomFile.DEFAULT_POM_FILE_NAME);
 		return sb.toString();
 	}
 	
@@ -61,12 +61,12 @@ public class MavenBuildCommand {
 		cmds.add("-Dfile="+tarFile.getName());
 		cmds.add("-Dfiles="+filesNames);
 		cmds.add("-Dtypes="+types);
-		cmds.add("-DDclassifiers="+classifier);
+		cmds.add("-Dclassifiers="+classifier);
 		cmds.add("-DartifactId="+ cfgFile.artifacId);
 		cmds.add("-DgroupId="+cfgFile.groupId);
 		cmds.add("-Dversion="+ cfgFile.version);
 		cmds.add("-Dpackaging=tar");
-		cmds.add("-DpomFile=pom.xml");
+		cmds.add("-DpomFile="+PomFile.DEFAULT_POM_FILE_NAME);
 		return cmds;
 	}
 	
@@ -95,7 +95,7 @@ public class MavenBuildCommand {
 			{
 				aClassifier = aFileName.substring(aFileName.indexOf(cfgFile.version)+cfgFile.version.length()+1, aFileName.lastIndexOf("."));
 			}
-			classifers.append(aClassifier);
+			classifers.append(aClassifier).append(",");
 		}
 		
 		result.put(FILES_KEY, fileNames.toString().substring(0,fileNames.toString().length()-1));

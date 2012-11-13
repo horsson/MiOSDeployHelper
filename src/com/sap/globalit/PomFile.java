@@ -11,6 +11,8 @@ public class PomFile {
 	private String artifacId;
 	private String version;
 	private String packaging;
+	
+	public static final String DEFAULT_POM_FILE_NAME = "mypom.xml";
 
 	public String getModelVersion() {
 		return modelVersion;
