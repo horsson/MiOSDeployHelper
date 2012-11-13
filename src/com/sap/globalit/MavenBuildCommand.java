@@ -1,6 +1,7 @@
 package com.sap.globalit;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,28 @@ public class MavenBuildCommand {
 		append(" ").
 		append("-DpomFile=pom.xml");
 		return sb.toString();
+	}
+	
+	public List<String> getCmd()
+	{
+		List<String> cmds = new ArrayList<String>();
+		String filesNames = getFilesAndType().get(FILES_KEY);
+		String types = getFilesAndType().get(TYPES_KEY);
+		String classifier = getFilesAndType().get(CLASSIFIERS_KEY);
+		cmds.add("mvn");
+		cmds.add(setting.getProperty("plugin","org.apache.maven.plugins:maven-deploy-plugin:2.7:deploy-file"));
+		cmds.add("-DrepositoryId="+setting.getProperty("repositoryId","build.snapshots.ios"));
+		cmds.add("-Durl="+setting.getProperty("url")); 
+		cmds.add("-Dfile="+tarFile.getName());
+		cmds.add("-Dfiles="+filesNames);
+		cmds.add("-Dtypes="+types);
+		cmds.add("-DDclassifiers="+classifier);
+		cmds.add("-DartifactId="+ cfgFile.artifacId);
+		cmds.add("-DgroupId="+cfgFile.groupId);
+		cmds.add("-Dversion="+ cfgFile.version);
+		cmds.add("-Dpackaging=tar");
+		cmds.add("-DpomFile=pom.xml");
+		return cmds;
 	}
 	
 	private Map<String, String>getFilesAndType()

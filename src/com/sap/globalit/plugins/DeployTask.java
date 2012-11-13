@@ -22,4 +22,6 @@ public interface DeployTask {
 	public void cleanup() throws IOException;
 	
 	public void setConfigFile(ConfigFile cfgFile);
+	
+	public void addListener(DeployTaskListener listener);
 }
