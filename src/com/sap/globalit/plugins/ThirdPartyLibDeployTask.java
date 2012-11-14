@@ -1,6 +1,5 @@
 package com.sap.globalit.plugins;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -15,11 +14,11 @@ import javax.swing.SwingUtilities;
 import org.apache.commons.io.FileUtils;
 
 import com.sap.globalit.ConfigFile;
-import com.sap.globalit.Utils;
 import com.sap.globalit.MavenBuildCommand;
 import com.sap.globalit.PomFile;
+import com.sap.globalit.Utils;
 
-public class ThirdPartyLibDeployTask implements DeployTask {
+public class ThirdPartyLibDeployTask implements DeployTask  {
 
 	private ConfigFile cfgFile;
 	private File rootFolder;
@@ -261,7 +260,10 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 			@Override
 			public void run() {
 				if (listener != null)
-					listener.onMessage(message, null);
+				{
+					if (!message.matches("(\\d*) KB"))
+						listener.onMessage(message, null);
+				}
 
 			}
 		});
@@ -304,16 +306,17 @@ public class ThirdPartyLibDeployTask implements DeployTask {
 				pb.directory(rootFolder);
 				
 				Process process = pb.start();
-				BufferedInputStream bis = new BufferedInputStream(process.getInputStream());
 				
-				byte[] buffer = new byte[512];
-				int count = -1;
 				
-				while ((count = bis.read(buffer)) != -1)
+				BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				
+				String line = null;
+				
+				while ((line = br.readLine()) != null)
 				{
-					String msg = new String(buffer, 0, count);
-					fireMessageEvent(msg);
-					System.out.println(msg);
+					
+					fireMessageEvent(line);
+					System.out.println(line);
 				}
 				int code = process.waitFor();
 				System.out.println("Done ! "+code);

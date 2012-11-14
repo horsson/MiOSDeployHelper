@@ -19,15 +19,16 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
+import com.apple.dnssd.DNSSD;
+import com.apple.eawt.Application;
 import com.sap.globalit.plugins.DeployManager;
 import com.sap.globalit.plugins.DeployTask;
+import com.sap.globalit.plugins.DeployTaskListener;
 import com.sap.globalit.plugins.ThirdPartyLibDeployTask;
 
 public class MainFrame extends JFrame implements MouseListener{
 
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = -416443540029364237L;
 	private JPanel contentPane;
 	private JTextField txtRootFolder;
@@ -45,11 +46,16 @@ public class MainFrame extends JFrame implements MouseListener{
 
 	/**
 	 * Launch the application.
+	 * See: 
+	 * https://developer.apple.com/library/mac/#documentation/Java/Reference/JavaSE6_AppleExtensionsRef/api/index.html
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				try {
+				try 
+				{
+					
+					Application app = Application.getApplication();
 					MainFrame frame = new MainFrame();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -63,6 +69,7 @@ public class MainFrame extends JFrame implements MouseListener{
 	 * Create the frame.
 	 */
 	public MainFrame() {
+		
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 509, 367);
@@ -70,6 +77,7 @@ public class MainFrame extends JFrame implements MouseListener{
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
+		
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBounds(6, 18, 495, 278);
@@ -233,7 +241,36 @@ public class MainFrame extends JFrame implements MouseListener{
 				deployManager.setDeplyTask(deployTask);
 				deployTask.setConfigFile(cfgFile);
 				try {
+					
 					deployManager.deploy();
+					final OutputConsole console = new OutputConsole();
+					console.setVisible(true);
+					deployTask.addListener(new DeployTaskListener() {
+						
+						@Override
+						public void onMessage(String message, Object context) {
+							console.outputMessage(message);
+							
+						}
+						
+						@Override
+						public void onError(String message, Object context) {
+							
+							console.outputMessage(message);
+						}
+						
+						@Override
+						public void onDeployStart(String message, Object context) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void onDeployDone(String message, Object context) {
+							// TODO Auto-generated method stub
+							
+						}
+					});
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
