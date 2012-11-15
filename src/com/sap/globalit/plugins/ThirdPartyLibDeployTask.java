@@ -12,12 +12,18 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 
 import com.sap.globalit.ConfigFile;
 import com.sap.globalit.MavenBuildCommand;
 import com.sap.globalit.PomFile;
 import com.sap.globalit.Utils;
 
+/**
+ * The plug-in deploys the 3rd party libs to the Nexus Server.
+ * @author Hao Hu
+ *
+ */
 public class ThirdPartyLibDeployTask implements DeployTask  {
 
 	private ConfigFile cfgFile;
@@ -33,6 +39,8 @@ public class ThirdPartyLibDeployTask implements DeployTask  {
 	private List<File> createdFileList = new ArrayList<File>();
 
 	private DeployTaskListener listener;
+	
+	private static Logger logger = Logger.getLogger(ThirdPartyLibDeployTask.class);
 
 	/**
 	 * A Tar file.
@@ -61,7 +69,6 @@ public class ThirdPartyLibDeployTask implements DeployTask  {
 		if (rootFolder.exists()) {
 			FileUtils.deleteDirectory(rootFolder);
 		}
-
 		return rootFolder.mkdir();
 	}
 
@@ -139,7 +146,7 @@ public class ThirdPartyLibDeployTask implements DeployTask  {
 	}
 
 	/**
-	 * (2)
+	 * Create the Tar file.
 	 * 
 	 * @throws IOException
 	 */
@@ -227,19 +234,15 @@ public class ThirdPartyLibDeployTask implements DeployTask  {
 	}
 
 	public void deploy() throws IOException {
-		// this.createRootFolder();
-		// this.createPOM();
-		// this.createTar();
-		// this.createHeaderFiles();
-		// this.createLibFiles();
-		// this.createBundleResource();
-		// MavenBuildCommand mbc = new MavenBuildCommand(cfgFile,
-		// createdFileList, tarFile);
+		if (listener != null)
+			listener.onDeployStart("Start Deploying...", null);
+		
 		new Thread(new DeployTask()).start();
 	}
 
 	@Override
 	public void init() throws IOException {
+		
 	}
 
 	@Override
@@ -261,8 +264,7 @@ public class ThirdPartyLibDeployTask implements DeployTask  {
 			public void run() {
 				if (listener != null)
 				{
-					if (!message.matches("(\\d*) KB"))
-						listener.onMessage(message, null);
+					listener.onMessage(message, null);
 				}
 
 			}
@@ -287,7 +289,9 @@ public class ThirdPartyLibDeployTask implements DeployTask  {
 		@Override
 		public void run() {
 			try {
+				fireMessageEvent("Creating root folder...");
 				createRootFolder();
+				fireMessageEvent("Creating POM file...");
 				createPOM();
 				fireMessageEvent("Creating Tar files...");
 				createTar();
@@ -300,33 +304,27 @@ public class ThirdPartyLibDeployTask implements DeployTask  {
 				MavenBuildCommand mbc = new MavenBuildCommand(cfgFile,
 						createdFileList, tarFile);
 				
-				
 				ProcessBuilder pb = new ProcessBuilder(mbc.getCmd());
 				pb.redirectErrorStream(true);
 				pb.directory(rootFolder);
-				
 				Process process = pb.start();
-				
-				
 				BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
 				
 				String line = null;
 				
 				while ((line = br.readLine()) != null)
 				{
-					
 					fireMessageEvent(line);
-					System.out.println(line);
 				}
 				int code = process.waitFor();
-				System.out.println("Done ! "+code);
-				
-				
+				logger.debug("Deploy Done! The process code is "+code);
+				if (listener != null)
+					listener.onDeployDone("Deploy Done!", null);
 			} catch (IOException ex) {
-				ex.printStackTrace();
+				logger.error("Error!!", ex);
 				fireErrorEvent(ex.getMessage());
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			} catch (InterruptedException ex) {
+				logger.error("Process waitFor interrupted!", ex);
 			}
 
 		}

@@ -13,7 +13,11 @@ import java.util.zip.ZipOutputStream;
 
 import org.kamranzafar.jtar.TarEntry;
 import org.kamranzafar.jtar.TarOutputStream;
-
+/**
+ * Utils methods.
+ * @author Hao Hu
+ *
+ */
 public class Utils {
 
 	private Utils() {

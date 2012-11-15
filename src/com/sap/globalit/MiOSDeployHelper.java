@@ -5,8 +5,8 @@ import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -19,14 +19,30 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import com.apple.dnssd.DNSSD;
+import org.apache.log4j.Logger;
+
+import com.apple.eawt.AboutHandler;
 import com.apple.eawt.Application;
+import com.apple.eawt.PreferencesHandler;
+import com.apple.eawt.QuitHandler;
+import com.apple.eawt.QuitResponse;
+import com.apple.eawt.AppEvent.AboutEvent;
+import com.apple.eawt.AppEvent.PreferencesEvent;
+import com.apple.eawt.AppEvent.QuitEvent;
 import com.sap.globalit.plugins.DeployManager;
 import com.sap.globalit.plugins.DeployTask;
 import com.sap.globalit.plugins.DeployTaskListener;
 import com.sap.globalit.plugins.ThirdPartyLibDeployTask;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JCheckBoxMenuItem;
+import java.awt.BorderLayout;
+import javax.swing.JScrollPane;
+import javax.swing.JPopupMenu;
+import java.awt.Component;
 
-public class MainFrame extends JFrame implements MouseListener{
+public class MiOSDeployHelper extends JFrame{
 
 	
 	private static final long serialVersionUID = -416443540029364237L;
@@ -41,9 +57,10 @@ public class MainFrame extends JFrame implements MouseListener{
 	private JTextField txtRI;
 	private JTextField txtDS;
 	private JTextField txtResourceFolder;
-	private JTextArea txtReadme;
 	private JTextField txtClassifier;
+	private JTextArea txtReadme;
 
+	private static Logger logger = Logger.getLogger(MiOSDeployHelper.class);
 	/**
 	 * Launch the application.
 	 * See: 
@@ -55,8 +72,9 @@ public class MainFrame extends JFrame implements MouseListener{
 				try 
 				{
 					
-					Application app = Application.getApplication();
-					MainFrame frame = new MainFrame();
+					System.setProperty("apple.laf.useScreenMenuBar", "true");
+					
+					MiOSDeployHelper frame = new MiOSDeployHelper();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -65,14 +83,59 @@ public class MainFrame extends JFrame implements MouseListener{
 		});
 	}
 
+	
+	
+	private void setMacOsFeatures()
+	{
+		Application app = Application.getApplication();
+		app.setPreferencesHandler(new PreferencesHandler() {
+			
+			@Override
+			public void handlePreferences(PreferencesEvent event) {
+				// TODO Do it later.
+				
+			}
+		});
+		
+		app.setAboutHandler(new AboutHandler() {
+			
+			@Override
+			public void handleAbout(AboutEvent event) {
+				
+			}
+		});
+
+	}
+	
 	/**
 	 * Create the frame.
 	 */
-	public MainFrame() {
-		
+	public MiOSDeployHelper() {
+		setMacOsFeatures();
+		MouseHandler mouseHandler = new MouseHandler();
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 509, 367);
+		
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		//TODO:It should load from xml and generated automatically.
+		JMenu menuPLugins = new JMenu("Plugins");
+		menuBar.add(menuPLugins);
+		
+		JCheckBoxMenuItem chckbxmntmFramework = new JCheckBoxMenuItem("3rd Party Lib");
+		chckbxmntmFramework.setSelected(true);
+		menuPLugins.add(chckbxmntmFramework);
+		
+		JMenuItem loadMore = new JMenuItem("Load more...");
+		menuPLugins.add(loadMore);
+		
+		JMenu menuHelp = new JMenu("Help");
+		menuBar.add(menuHelp);
+		
+		JMenuItem menuWiki = new JMenuItem("MiOS Wiki");
+		menuHelp.add(menuWiki);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -92,7 +155,8 @@ public class MainFrame extends JFrame implements MouseListener{
 		panelGeneral.add(lblRootFolder);
 		
 		txtRootFolder = new JTextField();
-		txtRootFolder.addMouseListener(this);
+		txtRootFolder.setToolTipText("Double click to open file dialog");
+		txtRootFolder.addMouseListener(mouseHandler);
 		
 		txtRootFolder.setBounds(103, 11, 347, 28);
 		panelGeneral.add(txtRootFolder);
@@ -143,9 +207,9 @@ public class MainFrame extends JFrame implements MouseListener{
 		panelFiles.add(lblHeaderFolder);
 		
 		txtHeaderFolder = new JTextField();
-		txtHeaderFolder.addMouseListener(this);
+		txtHeaderFolder.addMouseListener(mouseHandler);
 		txtHeaderFolder.setColumns(10);
-		txtHeaderFolder.setBounds(106, 10, 295, 28);
+		txtHeaderFolder.setBounds(106, 10, 341, 28);
 		panelFiles.add(txtHeaderFolder);
 		
 		JLabel label = new JLabel("Debug-Simulator");
@@ -159,9 +223,9 @@ public class MainFrame extends JFrame implements MouseListener{
 		panelFiles.add(label_1);
 		
 		txtDI = new JTextField();
-		txtDI.addMouseListener(this);
+		txtDI.addMouseListener(mouseHandler);
 		txtDI.setColumns(10);
-		txtDI.setBounds(106, 94, 295, 28);
+		txtDI.setBounds(106, 94, 341, 28);
 		panelFiles.add(txtDI);
 		
 		JLabel label_2 = new JLabel("Release-Simulator");
@@ -171,8 +235,8 @@ public class MainFrame extends JFrame implements MouseListener{
 		
 		txtRS = new JTextField();
 		txtRS.setColumns(10);
-		txtRS.setBounds(106, 128, 295, 28);
-		txtRS.addMouseListener(this);
+		txtRS.setBounds(106, 128, 341, 28);
+		txtRS.addMouseListener(mouseHandler);
 		panelFiles.add(txtRS);
 		
 		JLabel label_3 = new JLabel("Release-iphoneos");
@@ -182,14 +246,14 @@ public class MainFrame extends JFrame implements MouseListener{
 		
 		txtRI = new JTextField();
 		txtRI.setColumns(10);
-		txtRI.setBounds(106, 162, 295, 28);
-		txtRI.addMouseListener(this);
+		txtRI.setBounds(106, 162, 341, 28);
+		txtRI.addMouseListener(mouseHandler);
 		panelFiles.add(txtRI);
 		
 		txtDS = new JTextField();
-		txtDS.addMouseListener(this);
+		txtDS.addMouseListener(mouseHandler);
 		txtDS.setColumns(10);
-		txtDS.setBounds(106, 44, 295, 28);
+		txtDS.setBounds(106, 44, 341, 28);
 		panelFiles.add(txtDS);
 		
 		JLabel lblResourceFolder = new JLabel("Resource Folder");
@@ -199,8 +263,8 @@ public class MainFrame extends JFrame implements MouseListener{
 		
 		txtResourceFolder = new JTextField();
 		txtResourceFolder.setColumns(10);
-		txtResourceFolder.setBounds(106, 198, 295, 28);
-		txtResourceFolder.addMouseListener(this);
+		txtResourceFolder.setBounds(106, 198, 341, 28);
+		txtResourceFolder.addMouseListener(mouseHandler);
 		panelFiles.add(txtResourceFolder);
 		
 		final JCheckBox ckbSameFolder = new JCheckBox("Same Lib");
@@ -226,11 +290,19 @@ public class MainFrame extends JFrame implements MouseListener{
 		
 		JPanel panel = new JPanel();
 		tabbedPane.addTab("ReadMe", null, panel, null);
-		panel.setLayout(null);
+		panel.setLayout(new BorderLayout(0, 0));
+		
+		JScrollPane scrollPane = new JScrollPane();
+		panel.add(scrollPane, BorderLayout.CENTER);
 		
 		txtReadme = new JTextArea();
-		txtReadme.setBounds(6, 6, 462, 220);
-		panel.add(txtReadme);
+		scrollPane.setViewportView(txtReadme);
+		
+		JPopupMenu popupMenu = new JPopupMenu();
+		addPopup(txtReadme, popupMenu);
+		
+		JMenuItem mntmLoadFromFile = new JMenuItem("Load from file...");
+		popupMenu.add(mntmLoadFromFile);
 		
 		JButton btnDeploy = new JButton("Deploy");
 		btnDeploy.addActionListener(new ActionListener() {
@@ -244,6 +316,7 @@ public class MainFrame extends JFrame implements MouseListener{
 					
 					deployManager.deploy();
 					final OutputConsole console = new OutputConsole();
+					//TODO: Set the console  location.
 					console.setVisible(true);
 					deployTask.addListener(new DeployTaskListener() {
 						
@@ -261,18 +334,17 @@ public class MainFrame extends JFrame implements MouseListener{
 						
 						@Override
 						public void onDeployStart(String message, Object context) {
-							// TODO Auto-generated method stub
 							
 						}
 						
 						@Override
 						public void onDeployDone(String message, Object context) {
-							// TODO Auto-generated method stub
 							
 						}
 					});
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("Error occurs, when deploying.", e);
+		
 				}
 			}
 		});
@@ -282,7 +354,7 @@ public class MainFrame extends JFrame implements MouseListener{
 		JButton btnLoadConfig = new JButton("Load Config");
 		btnLoadConfig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				FileDialog fd = new FileDialog(MainFrame.this);
+				FileDialog fd = new FileDialog(MiOSDeployHelper.this);
 				fd.setVisible(true);
 				if (fd.getFile() == null)
 				{
@@ -295,11 +367,8 @@ public class MainFrame extends JFrame implements MouseListener{
 				{
 					return;
 				}
-				
 				setUIFromConfigFile(cfgFile);
-				
 			}
-
 
 		});
 		btnLoadConfig.setBounds(241, 308, 117, 29);
@@ -308,7 +377,7 @@ public class MainFrame extends JFrame implements MouseListener{
 		JButton btnSaveConfig = new JButton("Save Config");
 		btnSaveConfig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				FileDialog fd = new FileDialog(MainFrame.this);
+				FileDialog fd = new FileDialog(MiOSDeployHelper.this);
 				fd.setMode(FileDialog.SAVE);
 				fd.setVisible(true);
 				if (fd.getFile() != null)
@@ -323,45 +392,6 @@ public class MainFrame extends JFrame implements MouseListener{
 		contentPane.add(btnSaveConfig);
 	}
 
-	@Override
-	public void mouseClicked(MouseEvent event) {
-		if (event.getClickCount() != 2)
-			return;
-		JTextField textField = (JTextField) event.getSource();
-		if (textField == txtRootFolder || textField == txtHeaderFolder || textField == txtResourceFolder)
-			System.setProperty("apple.awt.fileDialogForDirectories", "true");
-		else
-			System.setProperty("apple.awt.fileDialogForDirectories", "false");
-		FileDialog dialog = new FileDialog(this);
-		dialog.setVisible(true);
-		if (dialog.getDirectory() != null && dialog.getFile()!=null)
-		{
-			String folderPath = String.format("%s%s", dialog.getDirectory(), dialog.getFile());
-			textField.setText(folderPath);
-		}
-		System.setProperty("apple.awt.fileDialogForDirectories", "false");
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent event) {
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent event) {
-		
-	}
-
-	@Override
-	public void mousePressed(MouseEvent event) {
-		
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent event) {
-		
-	}
-	
 	
 	private ConfigFile getConfigFileFromUI() {
 		ConfigFile cfgFile =new ConfigFile();
@@ -393,5 +423,49 @@ public class MainFrame extends JFrame implements MouseListener{
 		txtResourceFolder.setText(cfgFile.resourceFolder);
 		txtReadme.setText(cfgFile.readme);
 		txtClassifier.setText(cfgFile.classifier);
+	}
+	
+	/**
+	 * 
+	 * @author Hao Hu
+	 *
+	 */
+	class MouseHandler extends MouseAdapter
+	{
+		@Override
+		public void mouseClicked(MouseEvent event) {
+			if (event.getClickCount() != 2)
+				return;
+			JTextField textField = (JTextField) event.getSource();
+			if (textField == txtRootFolder || textField == txtHeaderFolder || textField == txtResourceFolder)
+				System.setProperty("apple.awt.fileDialogForDirectories", "true");
+			else
+				System.setProperty("apple.awt.fileDialogForDirectories", "false");
+			FileDialog dialog = new FileDialog(MiOSDeployHelper.this);
+			dialog.setVisible(true);
+			if (dialog.getDirectory() != null && dialog.getFile()!=null)
+			{
+				String folderPath = String.format("%s%s", dialog.getDirectory(), dialog.getFile());
+				textField.setText(folderPath);
+			}
+			System.setProperty("apple.awt.fileDialogForDirectories", "false");
+		}
+	}
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
 	}
 }
