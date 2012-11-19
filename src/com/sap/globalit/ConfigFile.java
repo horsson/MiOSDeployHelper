@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -13,7 +15,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class ConfigFile {
+public class ConfigFile{
 
 	private static ConfigFile instance;
 	public String rootFolder = "";
@@ -29,6 +31,8 @@ public class ConfigFile {
 	public String readme= "";
 	public String classifier = "";
 
+	
+	
 	
 	public void saveToFile(String filePath) {
 		StringBuilder sb = new StringBuilder();
@@ -138,4 +142,7 @@ public class ConfigFile {
 			}
 		}
 	}
+
+	private Map<String, String> values = new HashMap<String, String>();
+
 }
