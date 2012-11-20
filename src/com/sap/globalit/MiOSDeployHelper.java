@@ -2,9 +2,11 @@ package com.sap.globalit;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FileDialog;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -39,7 +41,6 @@ import com.sap.globalit.plugins.DeployTask;
 import com.sap.globalit.plugins.DeployTaskListener;
 import com.sap.globalit.plugins.Plugin;
 import com.sap.globalit.plugins.PluginManager;
-import com.sap.globalit.plugins.ThirdPartyLibDeployTask;
 
 public class MiOSDeployHelper extends JFrame {
 
@@ -58,6 +59,9 @@ public class MiOSDeployHelper extends JFrame {
 	private JTextField txtClassifier;
 	private JTextArea txtReadme;
 
+	private String cfgFilePath;
+	
+	
 	private static Logger logger = Logger.getLogger(MiOSDeployHelper.class);
 
 	/**
@@ -71,7 +75,6 @@ public class MiOSDeployHelper extends JFrame {
 				try {
 
 					System.setProperty("apple.laf.useScreenMenuBar", "true");
-
 					MiOSDeployHelper frame = new MiOSDeployHelper();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -96,7 +99,8 @@ public class MiOSDeployHelper extends JFrame {
 
 			@Override
 			public void handleAbout(AboutEvent event) {
-
+				AboutDlg dlg = new AboutDlg();
+				dlg.setVisible(true);
 			}
 		});
 
@@ -107,27 +111,13 @@ public class MiOSDeployHelper extends JFrame {
 	 */
 	public MiOSDeployHelper() {
 		setMacOsFeatures();
+		
 		MouseHandler mouseHandler = new MouseHandler();
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 509, 367);
 
-		JMenuBar menuBar = new JMenuBar();
-		setJMenuBar(menuBar);
-
-		JMenu menuPlugins = new JMenu("Plugins");
-		menuBar.add(menuPlugins);
-
-		createMenuItems(menuPlugins);
-
-		JMenuItem loadMore = new JMenuItem("Load more...");
-		menuPlugins.add(loadMore);
-
-		JMenu menuHelp = new JMenu("Help");
-		menuBar.add(menuHelp);
-
-		JMenuItem menuWiki = new JMenuItem("MiOS Wiki");
-		menuHelp.add(menuWiki);
+		createMenu();
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -359,9 +349,9 @@ public class MiOSDeployHelper extends JFrame {
 					return;
 				}
 
-				String filePath = String.format("%s%s", fd.getDirectory(),
+				cfgFilePath = String.format("%s%s", fd.getDirectory(),
 						fd.getFile());
-				ConfigFile cfgFile = ConfigFile.loadFromFile(filePath);
+				ConfigFile cfgFile = ConfigFile.loadFromFile(cfgFilePath);
 				if (cfgFile == null) {
 					return;
 				}
@@ -388,6 +378,36 @@ public class MiOSDeployHelper extends JFrame {
 		});
 		btnSaveConfig.setBounds(112, 308, 117, 29);
 		contentPane.add(btnSaveConfig);
+		
+		setCenter();
+	}
+
+	private void createMenu() {
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+
+		JMenu menuPlugins = new JMenu("Plugins");
+		menuBar.add(menuPlugins);
+
+		createMenuItems(menuPlugins);
+
+		JMenuItem loadMore = new JMenuItem("Load more...");
+		loadMore.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				logger.debug("Not yet!");
+			}
+		});
+		menuPlugins.add(loadMore);
+
+		JMenu menuHelp = new JMenu("Help");
+		menuBar.add(menuHelp);
+
+		JMenuItem menuWiki = new JMenuItem("MiOS Wiki");
+		menuHelp.add(menuWiki);
+		JMenuItem menuMyWiki = new JMenuItem("Deployer Wiki");
+		menuHelp.add(menuMyWiki);
 	}
 
 	private void createMenuItems(final JMenu menuPlugins) {
@@ -413,6 +433,18 @@ public class MiOSDeployHelper extends JFrame {
 			});
 			menuPlugins.add(aMenuItem);
 		}
+	}
+	
+	private void setCenter()
+	{
+		  Toolkit tk = Toolkit.getDefaultToolkit();
+		    Dimension screenSize = tk.getScreenSize();
+		    int screenHeight = screenSize.height;
+		    int screenWidth = screenSize.width;
+		    int frameWidth = this.getSize().width;
+		    int frameHeight = this.getSize().height;
+		    
+		    setLocation((screenWidth-frameWidth) / 2, (screenHeight-frameHeight) / 2);
 	}
 
 	private ConfigFile getConfigFileFromUI() {

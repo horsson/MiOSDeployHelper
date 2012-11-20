@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugins>
 	<item id="3rdparty" selected="true">
-		<class>com.sap.global.plugins.ThirdPartyLibDeployTask</class>
+		<class>com.sap.globalit.plugins.ThirdPartyLibDeployTask</class>
 	</item>
 	
 	<item id="Test" selected="false">
-		<class>com.sap.global.plugins.ThirdPartyLibDeployTask</class>
+		<class>com.sap.globalit.plugins.ThirdPartyLibDeployTask</class>
 	</item>
 </plugins>
