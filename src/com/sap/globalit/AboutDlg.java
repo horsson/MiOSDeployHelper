@@ -39,9 +39,9 @@ public class AboutDlg extends JDialog {
 		lblVersion.setBounds(119, 98, 71, 16);
 		getContentPane().add(lblVersion);
 		
-		JLabel lblDevelopedByHao = new JLabel("Developed by Hao Hu");
-		lblDevelopedByHao.setFont(new Font("Lucida Grande", Font.PLAIN, 11));
-		lblDevelopedByHao.setBounds(100, 118, 125, 16);
+		JLabel lblDevelopedByHao = new JLabel("Powered by Global IT Mobile CoE");
+		lblDevelopedByHao.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+		lblDevelopedByHao.setBounds(74, 118, 171, 16);
 		getContentPane().add(lblDevelopedByHao);
 		
 		JLabel lblHaohusapcom = new JLabel("hao.hu@sap.com");
